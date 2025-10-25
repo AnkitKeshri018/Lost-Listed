@@ -1,43 +1,30 @@
 
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 
 export const verifyJWT =async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies.refreshToken; // we are using httpOnly cookie
 
     if (!token) {
-      return res.status(401).json({
-        message:"Unauthorised request",
-        success:false
-      })
+      return res
+        .status(401)
+        .json({ message: "Not authenticated", success: false });
     }
 
-    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-    
-
-    const user = await User.findById(decodedToken._id).select(
-      "-password -refreshToken"
-    );
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded._id);
 
     if (!user) {
-      
-      return res.status(401).json({
-        message: "Invalid Access token",
-        success: false,
-      });
+      return res
+        .status(401)
+        .json({ message: "User not found", success: false });
     }
 
-    req.user = user;
+    req.user = user; // attach user to request
     next();
   } catch (error) {
-    res.status(500).json({
-      message: "Something went wrong",
-      success: false,
-      error: error.message,
-    });
+    return res.status(401).json({ message: "Invalid token", success: false });
   }
 };
 
