@@ -50,9 +50,13 @@ const foundItemSchema = new Schema(
       required: true,
     },
 
-    isReturned: {
+    isClaimed: {
       type: Boolean,
       default: false, // ✅ becomes true once the item is given back
+    },
+    claimedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }

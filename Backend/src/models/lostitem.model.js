@@ -17,13 +17,7 @@ const lostItemSchema = new Schema(
     category: {
       type: String,
       trim: true,
-      enum: [
-        "Electronics",
-        "Documents",
-        "Clothing",
-        "Accessories",
-        "Other",
-      ],
+      enum: ["Electronics", "Documents", "Clothing", "Accessories", "Other"],
       default: "Other",
     },
 
@@ -53,9 +47,13 @@ const lostItemSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    foundBy: { 
+      type: Schema.Types.ObjectId,
+      ref: "User" },
   },
   { timestamps: true }
 );
 
 // 🧠 MODEL EXPORT
 export const LostItem = mongoose.model("LostItem", lostItemSchema);
+
