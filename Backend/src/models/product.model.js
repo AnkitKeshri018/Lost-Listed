@@ -1,22 +1,24 @@
 import mongoose, { Schema } from "mongoose";
 
-// 🛍 PRODUCT (MARKETPLACE) SCHEMA
+
 const productSchema = new Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, "Product title is required"],
       trim: true,
+      maxlength: [100, "Title can't exceed 100 characters"],
     },
 
     description: {
       type: String,
       trim: true,
+      maxlength: [500, "Description can't exceed 500 characters"],
     },
 
     price: {
       type: Number,
-      required: true,
+      required: [true, "Price is required"],
       min: [0, "Price cannot be negative"],
     },
 
@@ -36,7 +38,7 @@ const productSchema = new Schema(
 
     condition: {
       type: String,
-      enum: ["new", "used"],
+      enum: ["new", "used", "like new", "for parts"],
       default: "used",
     },
 
@@ -49,7 +51,7 @@ const productSchema = new Schema(
 
     seller: {
       type: Schema.Types.ObjectId,
-      ref: "User", // 🔗 connects to the seller
+      ref: "User",
       required: true,
     },
 
@@ -57,14 +59,8 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
-
-    location: {
-      type: String,
-      trim: true,
-    },
   },
   { timestamps: true }
 );
 
-// 🧠 MODEL EXPORT
 export const Product = mongoose.model("Product", productSchema);

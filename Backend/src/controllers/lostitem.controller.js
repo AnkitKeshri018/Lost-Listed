@@ -198,6 +198,7 @@ export const markItemFound = async (req, res) => {
         data: item,
       });
     }
+    
 
     // Mark as found and save who found it
     item.isFound = true;
@@ -251,6 +252,7 @@ export const unmarkItemFound = async (req, res) => {
         data: item,
       });
     }
+
 
     item.isFound = false;
     await item.save();

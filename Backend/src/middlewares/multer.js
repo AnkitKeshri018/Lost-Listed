@@ -9,3 +9,7 @@ export const singleUpload = multer({ storage }).single("avatar");
 export const uploadLostItemImage = multer({ storage }).single("image");
 
 export const uploadFoundItemImage = multer({ storage }).single("image");
+
+export const uploadProductImages = multer({ storage }).array("images", 5);
+
+
