@@ -1,88 +1,85 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useApp } from '@/contexts/AppContext';
-import { toast } from 'sonner';
-import { Search } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Search } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useApp();
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    collegeId: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    collegeId: "",
+    password: "",
+    confirmPassword: "",
   });
 
+  // --- Login Handler (Replace with your real API later)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call - Replace with your backend integration
-    setTimeout(() => {
-      // Mock authentication
-      const mockUser = {
-        id: '1',
-        name: 'Demo User',
-        email: loginData.email,
-        collegeId: 'DEMO123',
-      };
-      
-      setUser(mockUser);
-      toast.success('Logged in successfully!');
-      navigate('/');
+    try {
+      // Example:
+      // const res = await axios.post("/api/login", loginData);
+      // toast.success("Logged in successfully!");
+      // navigate("/");
+
+      console.log("Login Data:", loginData);
+      toast.info("Connect your backend login API here.");
+    } catch (error) {
+      toast.error("Login failed.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
+  // --- Signup Handler (Replace with your real API later)
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (signupData.password !== signupData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error("Passwords do not match");
       return;
     }
 
     if (signupData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate API call - Replace with your backend integration
-    setTimeout(() => {
-      const mockUser = {
-        id: Date.now().toString(),
-        name: signupData.name,
-        email: signupData.email,
-        collegeId: signupData.collegeId,
-      };
-      
-      setUser(mockUser);
-      toast.success('Account created successfully!');
-      navigate('/');
+    try {
+      // Example:
+      // const res = await axios.post("/api/register", signupData);
+      // toast.success("Account created successfully!");
+      // navigate("/");
+
+      console.log("Signup Data:", signupData);
+      toast.info("Connect your backend signup API here.");
+    } catch (error) {
+      toast.error("Signup failed.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -93,7 +90,9 @@ const Auth = () => {
             <Search className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Lost & Listed</h1>
-          <p className="text-white/80">Find what's lost, list what you don't need</p>
+          <p className="text-white/80">
+            Find what's lost, list what you don't need
+          </p>
         </div>
 
         <Card className="shadow-hover">
@@ -103,6 +102,7 @@ const Auth = () => {
               Sign in to your account or create a new one to get started
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -110,6 +110,7 @@ const Auth = () => {
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
 
+              {/* LOGIN FORM */}
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
@@ -119,7 +120,9 @@ const Auth = () => {
                       type="email"
                       placeholder="your.email@college.edu"
                       value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      onChange={(e) =>
+                        setLoginData({ ...loginData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -129,16 +132,19 @@ const Auth = () => {
                       id="login-password"
                       type="password"
                       value={loginData.password}
-                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      onChange={(e) =>
+                        setLoginData({ ...loginData, password: e.target.value })
+                      }
                       required
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign In'}
+                    {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
               </TabsContent>
 
+              {/* SIGNUP FORM */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
@@ -148,7 +154,9 @@ const Auth = () => {
                       type="text"
                       placeholder="John Doe"
                       value={signupData.name}
-                      onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, name: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -159,7 +167,9 @@ const Auth = () => {
                       type="email"
                       placeholder="your.email@college.edu"
                       value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -170,7 +180,12 @@ const Auth = () => {
                       type="text"
                       placeholder="STU123456"
                       value={signupData.collegeId}
-                      onChange={(e) => setSignupData({ ...signupData, collegeId: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({
+                          ...signupData,
+                          collegeId: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -180,7 +195,12 @@ const Auth = () => {
                       id="signup-password"
                       type="password"
                       value={signupData.password}
-                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({
+                          ...signupData,
+                          password: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -190,12 +210,17 @@ const Auth = () => {
                       id="signup-confirm"
                       type="password"
                       value={signupData.confirmPassword}
-                      onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({
+                          ...signupData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Creating account...' : 'Create Account'}
+                    {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
               </TabsContent>
@@ -204,7 +229,7 @@ const Auth = () => {
         </Card>
 
         <p className="text-center text-white/70 text-sm mt-4">
-          Note: This is a demo authentication. Connect your own backend for production use.
+          This is only UI — connect your backend for full authentication.
         </p>
       </div>
     </div>

@@ -1,99 +1,199 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import ItemCard from '@/components/ItemCard';
-import AddItemModal from '@/components/AddItemModal';
-import ItemDetailModal from '@/components/ItemDetailModal';
-import FiltersPanel from '@/components/FiltersPanel';
-import { useApp, Item } from '@/contexts/AppContext';
-import Navbar from '@/components/Navbar';
+import React, { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent } from "@/components/ui/card";
+import { useSelector } from "react-redux";
+import useFetchAllLostItems from "@/hooks/usefetchallLostItems";
+import axios from "axios";
 
 const LostItems = () => {
-  const { items, user } = useApp();
+  useFetchAllLostItems();
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState('all');
-
-  const filteredItems = items.filter(item => {
-    if (item.type !== 'lost') return false;
-    if (category !== 'all' && item.category !== category) return false;
-    if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !item.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "Other",
+    dateLost: "",
+    location: "",
+    image: null,
   });
 
-  const handleAddClick = () => {
-    if (!user) {
-      alert('Please sign in to post an item');
-      return;
+  const lostItems = useSelector((state: any) => state.lostitem.lostItems);
+   
+  // 🧾 Handle input change
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  // 📸 Handle image file
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setForm({ ...form, image: file });
+  };
+
+
+
+
+  // 🚀 Handle form submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+
+      const res = await axios.post("/api/v1/lost-item/create", formData, {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        alert("Lost item reported successfully!");
+        setShowAddModal(false);
+        
+      }
+    } catch (error: any) {
+      console.error("Error reporting item:", error);
+      alert("Failed to report lost item");
     }
-    setShowAddModal(true);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-destructive">Lost Items</h1>
-          <p className="text-muted-foreground">
-            Report your lost items and help others find what they're looking for
-          </p>
-        </div>
 
-        <div className="mb-6">
-          <Button onClick={handleAddClick} className="gap-2">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 text-purple-700">
+              Lost Items
+            </h1>
+            <p className="text-muted-foreground">
+              Report your lost items and help others find them.
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+          >
             <Plus className="h-4 w-4" />
             Report Lost Item
           </Button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="lg:sticky lg:top-20 lg:self-start">
-            <FiltersPanel
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              category={category}
-              onCategoryChange={setCategory}
-            />
-          </aside>
-
-          <main>
-            {filteredItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
-                <p className="text-lg font-medium mb-2">No lost items reported</p>
-                <p className="text-muted-foreground">
-                  Try adjusting your filters or be the first to report a lost item
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredItems.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    item={item}
-                    onClick={() => setSelectedItem(item)}
+        {/* Items Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {lostItems.length === 0 ? (
+            <p>No lost items yet.</p>
+          ) : (
+            lostItems.map((item: any) => (
+              <Card key={item._id} className="hover:shadow-lg transition-all">
+                <CardContent className="p-6">
+                  <img
+                    src={item.image?.url}
+                    alt={item.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
                   />
-                ))}
-              </div>
-            )}
-          </main>
+                  <h3 className="text-xl font-semibold mb-1">{item.title}</h3>
+                  <p className="text-muted-foreground mb-2">
+                    {item.description}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Lost at: {item.location}
+                  </p>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
 
-      <AddItemModal
-        open={showAddModal}
-        onOpenChange={setShowAddModal}
-        type="lost"
-      />
+      {/* Simple Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md space-y-4"
+          >
+            <h2 className="text-2xl font-semibold mb-4">Report Lost Item</h2>
 
-      <ItemDetailModal
-        item={selectedItem}
-        open={!!selectedItem}
-        onOpenChange={(open) => !open && setSelectedItem(null)}
-      />
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={form.title}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={form.description}
+              onChange={handleChange}
+              className="w-full border p-2 rounded"
+            />
+
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="w-full border p-2 rounded"
+            >
+              <option>Electronics</option>
+              <option>Documents</option>
+              <option>Clothing</option>
+              <option>Accessories</option>
+              <option>Other</option>
+            </select>
+
+            <input
+              type="date"
+              name="dateLost"
+              value={form.dateLost}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
+
+            <input
+              type="text"
+              name="location"
+              placeholder="Location"
+              value={form.location}
+              onChange={handleChange}
+              required
+              className="w-full border p-2 rounded"
+            />
+
+            <input type="file" accept="image/*" onChange={handleFileChange} />
+
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                variant="secondary"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Submit
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

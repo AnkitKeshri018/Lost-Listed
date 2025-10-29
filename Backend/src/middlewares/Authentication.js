@@ -3,9 +3,18 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
 export const verifyJWT =async (req, res, next) => {
+ 
   try {
-    const token = req.cookies.refreshToken; // we are using httpOnly cookie
+    // Try from cookies first
+    let token = req.cookies?.refreshToken;
 
+    // If not found, try from Authorization header
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
     if (!token) {
       return res
         .status(401)

@@ -1,15 +1,14 @@
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Category } from '@/contexts/AppContext';
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface FiltersPanelProps {
   searchQuery: string;
@@ -23,6 +22,17 @@ interface FiltersPanelProps {
   onTypeChange?: (value: string) => void;
 }
 
+// We define our own simple category type instead of importing from Lovable context
+const categories = [
+  "all",
+  "electronics",
+  "clothing",
+  "books",
+  "accessories",
+  "furniture",
+  "other",
+];
+
 const FiltersPanel = ({
   searchQuery,
   onSearchChange,
@@ -34,8 +44,6 @@ const FiltersPanel = ({
   itemType,
   onTypeChange,
 }: FiltersPanelProps) => {
-  const categories: (Category | 'all')[] = ['all', 'electronics', 'clothing', 'books', 'accessories', 'furniture', 'other'];
-
   return (
     <div className="space-y-4 rounded-lg border bg-card p-4">
       <div className="flex items-center gap-2">
@@ -43,6 +51,7 @@ const FiltersPanel = ({
         <h3 className="font-semibold">Filters</h3>
       </div>
 
+      {/* Search Box */}
       <div className="space-y-2">
         <Label htmlFor="search">Search</Label>
         <div className="relative">
@@ -57,12 +66,13 @@ const FiltersPanel = ({
         </div>
       </div>
 
+      {/* Type Filter (optional) */}
       {showTypeFilter && onTypeChange && (
         <div className="space-y-2">
           <Label htmlFor="type">Type</Label>
           <Select value={itemType} onValueChange={onTypeChange}>
             <SelectTrigger id="type">
-              <SelectValue />
+              <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Items</SelectItem>
@@ -73,28 +83,32 @@ const FiltersPanel = ({
         </div>
       )}
 
+      {/* Category Filter */}
       <div className="space-y-2">
         <Label htmlFor="category">Category</Label>
         <Select value={category} onValueChange={onCategoryChange}>
           <SelectTrigger id="category">
-            <SelectValue />
+            <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
               <SelectItem key={cat} value={cat}>
-                {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "all"
+                  ? "All Categories"
+                  : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
+      {/* Sort Filter (optional) */}
       {sortBy !== undefined && onSortChange && (
         <div className="space-y-2">
           <Label htmlFor="sort">Sort By</Label>
           <Select value={sortBy} onValueChange={onSortChange}>
             <SelectTrigger id="sort">
-              <SelectValue />
+              <SelectValue placeholder="Select sorting" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="date-desc">Newest First</SelectItem>
@@ -106,14 +120,15 @@ const FiltersPanel = ({
         </div>
       )}
 
+      {/* Clear Button */}
       <Button
         variant="outline"
         className="w-full"
         onClick={() => {
-          onSearchChange('');
-          onCategoryChange('all');
-          if (onTypeChange) onTypeChange('all');
-          if (onSortChange) onSortChange('date-desc');
+          onSearchChange("");
+          onCategoryChange("all");
+          if (onTypeChange) onTypeChange("all");
+          if (onSortChange) onSortChange("date-desc");
         }}
       >
         Clear Filters

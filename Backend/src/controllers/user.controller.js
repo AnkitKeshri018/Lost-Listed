@@ -114,8 +114,10 @@ export const loginUser = async (req, res) => {
 
   const options = {
     httpOnly: true,
-    sameSite: "Strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    // secure: false, // ✅ false for localhost (use true only on HTTPS)
+    sameSite: "strict", // ✅ required for cross-origin cookies
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
 
   return res
@@ -137,6 +139,8 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   try {
+    
+    
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
@@ -156,7 +160,9 @@ export const logoutUser = async (req, res) => {
     // Clear the cookie from client
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      sameSite: "Strict",
+      // secure: false, // ✅ false for localhost (use true only on HTTPS)
+      sameSite: "strict", 
+      path: "/",
     });
 
     return res.status(200).json({
@@ -223,7 +229,7 @@ export const updateUserInfo = async (req, res) => {
 
     return res.status(200).json({
       message: "Profile updated successfully",
-      data: updatedUser,
+      user: updatedUser,
       success: true,
     });
   } catch (error) {
@@ -262,7 +268,7 @@ export const updateUserAvatar = async (req, res) => {
 
     return res.status(200).json({
       message: "Avatar updated successfully",
-      data: updatedUser,
+      user: updatedUser,
       success: true,
     });
   } catch (error) {

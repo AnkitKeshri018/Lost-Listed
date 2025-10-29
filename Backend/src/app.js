@@ -8,14 +8,16 @@ import productRouter from "./routes/product.routes.js"
 
 const app = express()
 
+app.use(cookieParser());
+app.use(express.json({ limit: "16kb" }));
 app.use(
-    cors({
-        origin:process.env.CORS_ORIGIN,
-        credentials:true
-    })
-)
+  cors({
+    origin: "http://localhost:5173", // must exactly match your frontend URL
+    credentials: true, // allow sending cookies
+  })
+);
 
-app.use(express.json({limit:"16kb"}))
+
 
 app.use(express.urlencoded({
     extended:true,
@@ -24,13 +26,14 @@ app.use(express.urlencoded({
 
 app.use(express.static("public"))
 
-app.use(cookieParser())
 
 
-app.use("/user", userRouter);
-app.use("/lost-item", lostitemRouter);
-app.use("/found-item", founditemRoter);
-app.use("/products",productRouter)
+
+
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/lost-item", lostitemRouter);
+app.use("/api/v1/found-item", founditemRoter);
+app.use("/api/v1/products",productRouter)
 
 
 
