@@ -3,13 +3,42 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFetchAllLostItems from "@/hooks/usefetchallLostItems";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "../components/ui/dialog.tsx";
+import {toast} from "sonner"
+import { setLostItems } from "@/redux/lostitemSlice.ts";
+import { useEffect } from "react";
+import { useFilterLostItems } from "@/hooks/useFilterLostItems.tsx";
+import useFetchAllFoundItems from "@/hooks/usefetchallFoundItems.tsx";
+
+
 
 const LostItems = () => {
-  useFetchAllLostItems();
+  
+    const { refetchItems } = useFetchAllLostItems();
+
+
+     const filterItems = useFilterLostItems();
+
+     const Spinner = () => (
+       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+     );
+
+  const dispatch = useDispatch();
+  const [Dialogactive,setDialogactive]= useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const[item,setitem] = useState(null);
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -19,7 +48,57 @@ const LostItems = () => {
     image: null,
   });
 
-  const lostItems = useSelector((state: any) => state.lostitem.lostItems);
+
+  const [filters, setFilters] = useState({
+    title: "",
+    category: "",
+    location: "",
+    dateFrom: "",
+    dateTo: "",
+    isFound: "",
+  });
+
+  useEffect(() => {
+    applyFilters();
+  }, []);
+
+
+  const handleFilterChange = (e: any) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  
+
+  const applyFilters = async () => {
+    try {
+      const params = new URLSearchParams();
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== "") params.append(key, value);
+      });
+         
+      const finalstring = params.toString();
+      const res = await filterItems(finalstring);
+
+      if (res.data.success) {
+        dispatch(setLostItems(res.data.data));
+        console.log("Filtered items:", res.data.data);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
+
+  
+
+
+
+
+
+  
    
   // 🧾 Handle input change
   const handleChange = (
@@ -37,12 +116,54 @@ const LostItems = () => {
     setForm({ ...form, image: file });
   };
 
+  
+    const cardClickHandler = async(id:any)=>{
+      try {
+        const res = await axios.get(`/api/v1/lost-item/${id}`,{withCredentials:true});
+        if(res.data.success){
+          setitem(res.data.data);
+          setDialogactive(true);
+        }
+        
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Something went wrong");
+      }
+    }
 
+
+   const [foundloading,setfoundloading]= useState(false);
+    const claimHandler = async(id:any)=>{
+     try {
+        setfoundloading(true);
+       const res = await axios.put(`/api/v1/lost-item/found/${id}`,{},{withCredentials:true});
+
+      if (res.data.success){
+
+        refetchItems()
+
+        
+        setitem(res.data.data);
+
+        toast.success("Item marked found and reporter notified");
+      }
+      
+     } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+     }
+     finally{
+      
+      setfoundloading(false)
+     }
+    }
+
+  const [loadingReport,setloadingReport] = useState(false);
+  
 
 
   // 🚀 Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setloadingReport(true);
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
@@ -54,15 +175,20 @@ const LostItems = () => {
       });
 
       if (res.data.success) {
-        alert("Lost item reported successfully!");
+        toast.success("Lost item reported successfully!");
         setShowAddModal(false);
         
       }
     } catch (error: any) {
-      console.error("Error reporting item:", error);
-      alert("Failed to report lost item");
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+    finally{
+      setloadingReport(false);
     }
   };
+
+
+const lostItems = useSelector((store: any) => store.lostitem.lostItems);
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,29 +198,124 @@ const LostItems = () => {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold mb-2 text-purple-700">
-              Lost Items
-            </h1>
+            <h1 className="text-4xl font-bold mb-2 text-red-600">Lost Items</h1>
             <p className="text-muted-foreground">
               Report your lost items and help others find them.
             </p>
           </div>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+            className="gap-2 bg-red-500 hover:bg-red-600 text-white"
           >
             <Plus className="h-4 w-4" />
             Report Lost Item
           </Button>
         </div>
 
+        {/*Filter Card */}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+          <input
+            name="title"
+            className="border p-2 rounded text-sm"
+            placeholder="Search Title"
+            onChange={handleFilterChange}
+            value={filters.title}
+          />
+
+          <input
+            name="location"
+            className="border p-2 rounded text-sm"
+            placeholder="Location"
+            onChange={handleFilterChange}
+            value={filters.location}
+          />
+
+          <select
+            name="category"
+            className="border p-2 rounded text-sm"
+            onChange={handleFilterChange}
+            value={filters.category}
+          >
+            <option value="">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Documents">Documents</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <input
+            type="date"
+            name="dateFrom"
+            className="border p-2 rounded text-sm"
+            onChange={handleFilterChange}
+            value={filters.dateFrom}
+          />
+
+          <input
+            type="date"
+            name="dateTo"
+            className="border p-2 rounded text-sm"
+            onChange={handleFilterChange}
+            value={filters.dateTo}
+          />
+
+          <select
+            name="isFound"
+            className="border p-2 rounded text-sm"
+            onChange={handleFilterChange}
+            value={filters.isFound}
+          >
+            <option value="">All</option>
+            <option value="true">Found</option>
+            <option value="false">Not Found</option>
+          </select>
+        </div>
+
+        <div className="mb-4 flex gap-2">
+          <Button
+            onClick={applyFilters}
+            className="bg-red-500  hover:bg-red-400 text-white"
+          >
+            Apply Filters
+          </Button>
+          <Button
+            variant="secondary"
+            className="bg-red-500 text-white hover:bg-red-400"
+            onClick={async () => {
+              // reset inputs
+              setFilters({
+                title: "",
+                category: "",
+                location: "",
+                dateFrom: "",
+                dateTo: "",
+                isFound: "",
+              });
+
+              // ✅ reset results in UI
+              const res = await filterItems(""); // empty params = get all
+              if (res.data.success) {
+                dispatch(setLostItems(res.data.data));
+              }
+            }}
+          >
+            Reset Filters
+          </Button>
+        </div>
+
         {/* Items Grid */}
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {lostItems.length === 0 ? (
+          {lostItems?.length === 0 ? (
             <p>No lost items yet.</p>
           ) : (
-            lostItems.map((item: any) => (
-              <Card key={item._id} className="hover:shadow-lg transition-all">
+            lostItems?.map((item: any) => (
+              <Card
+                key={item._id}
+                className="hover:shadow-lg transition-all"
+                onClick={() => cardClickHandler(item._id)}
+              >
                 <CardContent className="p-6">
                   <img
                     src={item.image?.url}
@@ -186,14 +407,92 @@ const LostItems = () => {
               </Button>
               <Button
                 type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-red-600 hover:bg-red-500 text-white"
               >
-                Submit
+                {loadingReport && <Spinner />}
+                {loadingReport ? "Reporting Your item..." : "Report Lost Item"}
               </Button>
             </div>
           </form>
         </div>
       )}
+      <Dialog open={Dialogactive} onOpenChange={setDialogactive}>
+        <DialogContent className="max-w-lg w-[90%] max-h-[80vh] overflow-y-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
+          {item ? ( // ✅ Put condition here
+            <>
+              <DialogHeader>
+                <DialogTitle>{item.title}</DialogTitle>
+                <DialogDescription>{item.description}</DialogDescription>
+              </DialogHeader>
+
+              <div className="flex flex-col gap-4 mt-4">
+                <img
+                  src={item.image?.url}
+                  alt={item.title}
+                  className="w-full rounded-lg object-cover"
+                />
+
+                <div className="text-sm space-y-1">
+                  <p>
+                    <strong>Category:</strong> {item.category}
+                  </p>
+                  <p>
+                    <strong>Date Lost:</strong>{" "}
+                    {new Date(item.dateLost).toDateString()}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {item.location}
+                  </p>
+                  <div>
+                    <Button
+                      className="w-full p-1 mt-2 bg-green-500 hover:bg-green-400"
+                      onClick={() => 
+                        claimHandler(item._id)
+                       
+                      }
+                      disabled={item.isFound || foundloading}
+                    >
+                      {foundloading ? (
+                        <>
+                          <Spinner /> Marking as Found...
+                        </>
+                      ) : item.isFound ? (
+                        "Found"
+                      ) : (
+                        "Mark as found!"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mt-3  pt-3">
+                  <img
+                    src={item.user?.avatar?.url}
+                    alt={item.user?.username}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="font-medium">
+                      Reported By: {item.user?.fullName}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      @{item.user?.username}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="secondary">Close</Button>
+                </DialogClose>
+              </DialogFooter>
+            </>
+          ) : (
+            <p className="text-center py-4">Loading item details...</p> // 👈 Fallback while fetching
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

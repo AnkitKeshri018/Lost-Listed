@@ -5,15 +5,18 @@ const lostitemSlice = createSlice({
   name: "lostitem",
   initialState: {
     lostItems: [],
+    userlostItems:[],
+
   },
   reducers: {
     setLostItems: (state, action) => {
       state.lostItems = action.payload;
     },
+    setuserLostItems:(state,action)=>{
+      state.userlostItems = action.payload;
+    }
   },
 });
 
-export const {
-  setLostItems,
-} = lostitemSlice.actions;
+export const { setLostItems, setuserLostItems } = lostitemSlice.actions;
 export default lostitemSlice.reducer;

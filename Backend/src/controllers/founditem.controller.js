@@ -113,6 +113,7 @@ export const getUserFoundItems = async (req, res) => {
     const userId = req.user._id;
     const items = await FoundItem.find({ user: userId })
       .populate("user", "username fullName avatar")
+      .populate("claimedBy", "fullName email phone")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -190,10 +191,20 @@ export const markItemClaimed = async (req, res) => {
     const { id } = req.params;
     const claimerId = req.user._id; // user who marks it claimed
 
+
+   
+
     // Fetch the found item and populate the original owner's info
-    const item = await FoundItem.findById(id).populate("user", "email fullName");
+    const item = await FoundItem.findById(id).populate("user", "email username fullName avatar");
 
     if (!item) return res.status(404).json({ message: "Item not found" });
+
+    if (item.user._id.toString() === claimerId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot claim item founded by you.",
+      });
+    }
 
     if (item.isClaimed) {
       return res.status(400).json({
@@ -230,6 +241,7 @@ Please contact them to return their item.`;
     await sendEmail({ to: ownerEmail, subject, text });
 
     return res.status(200).json({
+      success:true,
       message: "Item marked as claimed and founder notified with claimer info",
       data: item,
     });

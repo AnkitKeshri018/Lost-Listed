@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
+      <Toaster  className="z-[99999]" />
       <Sonner />
       <BrowserRouter>
         <Routes>
@@ -29,9 +29,9 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/profile" element={<Profile/>} />
+          <Route path="/profile" element={<Profile />} />
           {/* Catch-all for undefined routes */}
-          
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

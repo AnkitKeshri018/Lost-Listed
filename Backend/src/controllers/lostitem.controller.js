@@ -108,6 +108,7 @@ export const getUserLostItems = async (req, res) => {
     const userId = req.user._id;
     const items = await LostItem.find({ user: userId })
       .populate("user", "username fullName avatar")
+      .populate("foundBy", "fullName email phone")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -184,13 +185,23 @@ export const updateLostItem = async (req, res) => {
 
 export const markItemFound = async (req, res) => {
   try {
+
     const { id } = req.params;
     const finderId = req.user._id; // user who marks it found
 
+    
+
     // Fetch the lost item and populate the original owner's info
-    const item = await LostItem.findById(id).populate("user", "email fullName");
+    const item = await LostItem.findById(id).populate("user", "email fullName avatar username");
 
     if (!item) return res.status(404).json({ message: "Item not found" });
+
+    if (item.user._id.toString() === finderId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot mark your own lost item as found.",
+      });
+    }
 
     if (item.isFound) {
       return res.status(400).json({
@@ -228,6 +239,7 @@ Please contact them to retrieve your item.`;
     await sendEmail({ to: ownerEmail, subject, text });
 
     return res.status(200).json({
+      success:true,
       message: "Item marked as found and owner notified with finder info",
       data: item,
     });

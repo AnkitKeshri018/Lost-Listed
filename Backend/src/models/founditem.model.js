@@ -57,6 +57,7 @@ const foundItemSchema = new Schema(
     claimedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      default:null
     },
   },
   { timestamps: true }

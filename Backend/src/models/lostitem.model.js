@@ -47,9 +47,11 @@ const lostItemSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    foundBy: { 
+    foundBy: {
       type: Schema.Types.ObjectId,
-      ref: "User" },
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true }
 );
