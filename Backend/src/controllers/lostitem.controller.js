@@ -3,6 +3,7 @@ import getDataUri from "../utils/getDataUri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { User } from "../models/user.model.js";
+import { Activity } from "../models/activity.model.js";
 
 export const createLostItem = async (req, res) => {
   try {
@@ -26,7 +27,7 @@ export const createLostItem = async (req, res) => {
       };
     }
 
-    const newItem = await LostItem.create({
+    const lostItem = await LostItem.create({
       title,
       description,
       category,
@@ -36,9 +37,18 @@ export const createLostItem = async (req, res) => {
       image: imageData,
     });
 
+    await Activity.create({
+      user: req.user._id,
+      item: lostItem._id,
+      itemType: "LostItem",
+      activityType: "LOST_REPORTED",
+      message: `${req.user.fullName} reported a lost item: ${lostItem.title}`,
+    });
+
+
     return res.status(201).json({
       message: "Lost item created successfully",
-      data: newItem,
+      data: lostItem,
       success: true,
     });
   } catch (error) {
@@ -78,8 +88,8 @@ export const getLostItemById = async (req, res) => {
     const { id } = req.params;
 
     const lostItem = await LostItem.findById(id)
-      .populate("user", "username fullName avatar")
-      .populate("foundBy", "username fullName email");
+      .populate("user", "username fullName avatar email phone")
+      .populate("foundBy", "username fullName email avatar phone");
 
     if (!lostItem) {
       return res.status(404).json({
@@ -192,7 +202,7 @@ export const markItemFound = async (req, res) => {
     
 
     // Fetch the lost item and populate the original owner's info
-    const item = await LostItem.findById(id).populate("user", "email fullName avatar username");
+    const item = await LostItem.findById(id).populate("user", "email fullName avatar username phone");
 
     if (!item) return res.status(404).json({ message: "Item not found" });
 
@@ -238,6 +248,15 @@ Please contact them to retrieve your item.`;
 
     await sendEmail({ to: ownerEmail, subject, text });
 
+    await Activity.create({
+      user: req.user._id,
+      item: item._id,
+      itemType: "FoundItem",
+      activityType: "FOUND_REPORTED",
+      message: `${req.user.fullName} found an item: ${item.title}`,
+    });
+
+
     return res.status(200).json({
       success:true,
       message: "Item marked as found and owner notified with finder info",
@@ -258,6 +277,14 @@ export const unmarkItemFound = async (req, res) => {
 
     if (!item) return res.status(404).json({ message: "Item not found" });
 
+
+    if (item.foundBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "You are forbidden to perform this action",
+        success: false,
+      });
+    }
+    
     if (!item.isFound) {
       return res.status(400).json({
         message: "Item is already unmarked as found",
@@ -265,8 +292,11 @@ export const unmarkItemFound = async (req, res) => {
       });
     }
 
+    
+
 
     item.isFound = false;
+    item.foundBy = null;
     await item.save();
 
     return res.status(200).json({
@@ -379,4 +409,44 @@ export const getRecentLostItems = async (req, res) => {
     });
   }
 };
+
+export const getUserFoundByItems = async(req,res)=>{
+  try {
+    const userId = req.user?._id;
+    if(!userId){
+      return res.status(401).json({
+        message:"user not authenticated",
+        success:false
+      })
+    }
+  
+    const items = await LostItem.find({ foundBy: userId })
+      .populate("user", "username fullName email phone")
+      .populate("foundBy", "fullName email phone")
+      .sort({ createdAt: -1 });
+  
+
+      if (!items || items.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No items found that were marked by you as found",
+        });
+      }
+      
+      return res.status(200).json({
+        message:"Items foundBy you fetched successfully",
+        data:items,
+        success:true
+      })
+  } catch (error) {
+    console.error("Error fetching items foundBy you:", error);
+    return res.status(500).json({
+      message:"Internal server error",
+      success:false
+    })
+    
+  }
+
+
+}
 

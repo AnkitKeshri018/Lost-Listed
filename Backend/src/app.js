@@ -5,6 +5,7 @@ import userRouter from "./routes/user.routes.js"
 import lostitemRouter from "./routes/lostitem.routes.js"
 import founditemRoter from "./routes/founditem.routes.js"
 import productRouter from "./routes/product.routes.js"
+import activityRouter from "./routes/activity.routes.js"
 
 const app = express()
 
@@ -34,6 +35,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/lost-item", lostitemRouter);
 app.use("/api/v1/found-item", founditemRoter);
 app.use("/api/v1/products",productRouter)
+app.use("/api/v1/activity",activityRouter)
 
 
 

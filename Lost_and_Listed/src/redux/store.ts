@@ -3,6 +3,7 @@ import authSlice from "./authSlice.ts"
 import lostitemSlice from "./lostitemSlice.ts"
 import founditemSlice from "./founditemSlice.ts"
 import productSlice from "./productSlice.ts"
+import activitySlice from "./activitySlice.ts"
 
 
 import {
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
   auth: authSlice,
   lostitem:lostitemSlice,
   founditem:founditemSlice,
-  product:productSlice
+  product:productSlice,
+  activity:activitySlice
   
 });
 

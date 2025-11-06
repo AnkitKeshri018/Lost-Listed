@@ -30,7 +30,6 @@ const productSchema = new Schema(
         "Clothing",
         "Accessories",
         "Home",
-        "Vehicles",
         "Other",
       ],
       default: "Other",
@@ -38,8 +37,8 @@ const productSchema = new Schema(
 
     condition: {
       type: String,
-      enum: ["new", "used", "like new", "for parts"],
-      default: "used",
+      enum: ["new","like_new","very_good","good","fair","for_parts"],
+      default: "good",
     },
 
     images: [

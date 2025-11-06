@@ -5,6 +5,8 @@ const authSlice = createSlice({
   initialState: {
     loading: false,
     user: null,
+    userMarkedfoundItems: [],
+    userClaimedItems: [],
   },
   reducers: {
     setLoading: (state, action) => {
@@ -13,8 +15,14 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
+    setuserMarkedfoundItems:(state,action)=>{
+      state.userMarkedfoundItems = action.payload;
+    },
+    setuserClaimedItems:(state,action)=>{
+      state.userClaimedItems = action.payload
+    }
   },
 });
 
-export const { setLoading, setUser } = authSlice.actions;
+export const { setLoading, setUser,setuserClaimedItems,setuserMarkedfoundItems } = authSlice.actions;
 export default authSlice.reducer;

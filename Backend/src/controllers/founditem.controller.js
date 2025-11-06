@@ -3,8 +3,7 @@ import getDataUri from "../utils/getDataUri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { User } from "../models/user.model.js";
-
-
+import { Activity } from "../models/activity.model.js";
 
 export const createFoundItem = async (req, res) => {
   try {
@@ -38,6 +37,14 @@ export const createFoundItem = async (req, res) => {
       image: imageData,
     });
 
+    await Activity.create({
+      user: req.user._id,
+      item: newItem._id,
+      itemType: "FoundItem",
+      activityType: "FOUND_REPORTED",
+      message: `${req.user.fullName} found an item: ${newItem.title}`,
+    });
+
     return res.status(201).json({
       message: "Found item created successfully",
       data: newItem,
@@ -51,8 +58,6 @@ export const createFoundItem = async (req, res) => {
     });
   }
 };
-
-
 
 export const getAllFoundItems = async (req, res) => {
   try {
@@ -75,15 +80,13 @@ export const getAllFoundItems = async (req, res) => {
   }
 };
 
-
-
 export const getFoundItemById = async (req, res) => {
   try {
     const { id } = req.params;
 
     const foundItem = await FoundItem.findById(id)
-      .populate("user", "username fullName avatar")
-      .populate("claimedBy", "username fullName email");
+      .populate("user", "username fullName avatar email phone")
+      .populate("claimedBy", "username fullName email avatar phone");
 
     if (!foundItem) {
       return res.status(404).json({
@@ -106,8 +109,6 @@ export const getFoundItemById = async (req, res) => {
   }
 };
 
-
-
 export const getUserFoundItems = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -129,8 +130,6 @@ export const getUserFoundItems = async (req, res) => {
     });
   }
 };
-
-
 
 export const updateFoundItem = async (req, res) => {
   try {
@@ -185,17 +184,16 @@ export const updateFoundItem = async (req, res) => {
   }
 };
 
-
 export const markItemClaimed = async (req, res) => {
   try {
     const { id } = req.params;
     const claimerId = req.user._id; // user who marks it claimed
 
-
-   
-
     // Fetch the found item and populate the original owner's info
-    const item = await FoundItem.findById(id).populate("user", "email username fullName avatar");
+    const item = await FoundItem.findById(id).populate(
+      "user",
+      "email username fullName avatar phone"
+    );
 
     if (!item) return res.status(404).json({ message: "Item not found" });
 
@@ -213,7 +211,6 @@ export const markItemClaimed = async (req, res) => {
       });
     }
 
-   
     item.isClaimed = true;
     item.claimedBy = claimerId;
     await item.save();
@@ -240,8 +237,16 @@ Please contact them to return their item.`;
 
     await sendEmail({ to: ownerEmail, subject, text });
 
+    await Activity.create({
+      user: req.user._id,
+      item: item._id,
+      itemType: "FoundItem",
+      activityType: "ITEM_CLAIMED",
+      message: `${req.user.fullName} claimed an item: ${item.title}`,
+    });
+
     return res.status(200).json({
-      success:true,
+      success: true,
       message: "Item marked as claimed and founder notified with claimer info",
       data: item,
     });
@@ -251,13 +256,19 @@ Please contact them to return their item.`;
   }
 };
 
-
 export const unmarkItemClaimed = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await FoundItem.findById(id);
 
     if (!item) return res.status(404).json({ message: "Item not found" });
+
+    if (item.claimedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "You are forbidden to perform this action",
+        success: false,
+      });
+    }
 
     if (!item.isClaimed) {
       return res.status(400).json({
@@ -267,6 +278,7 @@ export const unmarkItemClaimed = async (req, res) => {
     }
 
     item.isClaimed = false;
+    item.claimedBy = null;
     await item.save();
 
     return res.status(200).json({
@@ -278,7 +290,6 @@ export const unmarkItemClaimed = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
-
 
 export const deleteFoundItem = async (req, res) => {
   try {
@@ -317,11 +328,10 @@ export const deleteFoundItem = async (req, res) => {
   }
 };
 
-
-
 export const filterFoundItems = async (req, res) => {
   try {
-    const { title, category, location, dateFrom, dateTo, isClaimed } = req.query;
+    const { title, category, location, dateFrom, dateTo, isClaimed } =
+      req.query;
 
     const query = {};
 
@@ -360,7 +370,6 @@ export const filterFoundItems = async (req, res) => {
   }
 };
 
-
 export const getRecentFoundItems = async (req, res) => {
   try {
     const recentItems = await FoundItem.find()
@@ -377,6 +386,42 @@ export const getRecentFoundItems = async (req, res) => {
     console.error("Error fetching recent found items:", error);
     return res.status(500).json({
       message: "Something went wrong",
+      success: false,
+    });
+  }
+};
+
+export const getUserClamiedByItems = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({
+        message: "user not authenticated",
+        success: false,
+      });
+    }
+
+    const items = await FoundItem.find({ claimedBy: userId })
+      .populate("user", "username fullName email phone")
+      .populate("claimedBy", "fullName email phone")
+      .sort({ createdAt: -1 });
+
+    if (!items || items.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No items found that were Claimed by you",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Items Claimed by you fetched successfully",
+      data: items,
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error fetching items claimed by you:", error);
+    return res.status(500).json({
+      message: "Internal server error",
       success: false,
     });
   }

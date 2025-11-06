@@ -1,5 +1,13 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Package, ShoppingBag, User, LogOut } from "lucide-react";
+import {
+  Search,
+  Package,
+  ShoppingBag,
+  User,
+  LogOut,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,18 +20,32 @@ import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "@/redux/authSlice";
 import axios from "axios";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const { user } = useSelector((store: any) => store.auth);
 
   const isActive = (path: any) => location.pathname === path;
 
+  // --- Dark mode state ---
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved === "true" ? true : false;
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("darkMode", darkMode.toString());
+  }, [darkMode]);
+
   const handleLogout = async () => {
-    console.log("handle logout clicked");
     try {
       await axios.post(`/api/v1/user/logout`, {}, { withCredentials: true });
       dispatch(setUser(null));
@@ -78,8 +100,23 @@ const Navbar = () => {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="relative w-12 h-6 rounded-full p-1 flex items-center transition-colors duration-500 bg-gray-300 dark:bg-gray-700"
+            >
+              <div
+                className={`absolute w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 ${
+                  darkMode
+                    ? "translate-x-6 bg-gray-800"
+                    : "translate-x-0 bg-yellow-400"
+                }`}
+              />
+              <Sun className="w-4 h-4 absolute left-0 text-yellow-400" />
+              <Moon className="w-4 h-4 absolute right-0 text-gray-800" />
+            </button>
+
             {user ? (
-              // ✅ Logged-in user dropdown
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 transition">
@@ -113,7 +150,6 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              // 👇 When user is not logged in
               <>
                 <Button variant="outline" asChild>
                   <Link to="/login">Login</Link>

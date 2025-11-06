@@ -1,7 +1,7 @@
 import express from "express"
 import { uploadFoundItemImage } from "../middlewares/multer.js"
 import { verifyJWT } from "../middlewares/Authentication.js"
-import { createFoundItem, deleteFoundItem, filterFoundItems, getAllFoundItems, getFoundItemById, getRecentFoundItems, getUserFoundItems, markItemClaimed, unmarkItemClaimed, updateFoundItem } from "../controllers/founditem.controller.js";
+import { createFoundItem, deleteFoundItem, filterFoundItems, getAllFoundItems, getFoundItemById, getRecentFoundItems, getUserClamiedByItems, getUserFoundItems, markItemClaimed, unmarkItemClaimed, updateFoundItem } from "../controllers/founditem.controller.js";
 
 
 
@@ -12,6 +12,8 @@ router.route("/create").post(verifyJWT,uploadFoundItemImage,createFoundItem);
  router.route("/filter").get(filterFoundItems);
  router.route("/user").get(verifyJWT, getUserFoundItems);
  router.route("/recent").get(getRecentFoundItems);
+ router.route("/claimedByuser").get(verifyJWT,getUserClamiedByItems);
+
  router.route("/:id").get(getFoundItemById);
  router.route("/update/:id").put(verifyJWT,uploadFoundItemImage,updateFoundItem)
  router.route("/claim/:id").put(verifyJWT,markItemClaimed);

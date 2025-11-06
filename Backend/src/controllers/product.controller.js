@@ -3,6 +3,7 @@ import getDataUri from "../utils/getDataUri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { User } from "../models/user.model.js";
+import { Activity } from "../models/activity.model.js";
 
 
 
@@ -47,6 +48,14 @@ export const createProduct = async (req, res) => {
       condition,
       images,
       seller: req.user._id,
+    });
+
+    await Activity.create({
+      user: req.user._id,
+      item: product._id,
+      itemType: "Product",
+      activityType: "ITEM_FOR_SALE",
+      message: `${req.user.fullName} listed an item: ${product.title} for sale`,
     });
 
     return res.status(201).json({
@@ -179,7 +188,7 @@ export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findById(id).populate("seller", "username fullName email");
+    const product = await Product.findById(id).populate("seller", "username fullName email avatar phone email");
 
     if (!product) {
       return res.status(404).json({

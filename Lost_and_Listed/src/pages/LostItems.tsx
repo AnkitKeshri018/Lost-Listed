@@ -175,6 +175,7 @@ const LostItems = () => {
       });
 
       if (res.data.success) {
+        await refetchItems()
         toast.success("Lost item reported successfully!");
         setShowAddModal(false);
         
@@ -184,6 +185,14 @@ const LostItems = () => {
     }
     finally{
       setloadingReport(false);
+      setForm({
+        title: "",
+        description: "",
+        category: "Other",
+        dateLost: "",
+        location: "",
+        image: null,
+      });
     }
   };
 
@@ -212,65 +221,80 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
           </Button>
         </div>
 
-        {/*Filter Card */}
-
+        {/*Filter Card ha */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+          {/* Title Input */}
           <input
             name="title"
-            className="border p-2 rounded text-sm"
             placeholder="Search Title"
             onChange={handleFilterChange}
             value={filters.title}
+            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
           />
 
+          {/* Location Input */}
           <input
             name="location"
-            className="border p-2 rounded text-sm"
             placeholder="Location"
             onChange={handleFilterChange}
             value={filters.location}
+            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
           />
 
-          <select
-            name="category"
-            className="border p-2 rounded text-sm"
-            onChange={handleFilterChange}
-            value={filters.category}
-          >
-            <option value="">All Categories</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Documents">Documents</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Accessories">Accessories</option>
-            <option value="Other">Other</option>
-          </select>
+          {/* Category Select */}
+          <div className="relative">
+            <select
+              name="category"
+              onChange={handleFilterChange}
+              value={filters.category}
+              className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8"
+            >
+              <option value="">All Categories</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Documents">Documents</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Accessories">Accessories</option>
+              <option value="Other">Other</option>
+            </select>
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
+              ▼
+            </span>
+          </div>
 
+          {/* Date From */}
           <input
             type="date"
             name="dateFrom"
-            className="border p-2 rounded text-sm"
             onChange={handleFilterChange}
             value={filters.dateFrom}
+            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white"
           />
 
+          {/* Date To */}
           <input
             type="date"
             name="dateTo"
-            className="border p-2 rounded text-sm"
             onChange={handleFilterChange}
             value={filters.dateTo}
+            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white"
           />
 
-          <select
-            name="isFound"
-            className="border p-2 rounded text-sm"
-            onChange={handleFilterChange}
-            value={filters.isFound}
-          >
-            <option value="">All</option>
-            <option value="true">Found</option>
-            <option value="false">Not Found</option>
-          </select>
+          {/* Is Found Select */}
+          <div className="relative">
+            <select
+              name="isFound"
+              onChange={handleFilterChange}
+              value={filters.isFound}
+              className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8"
+            >
+              <option value="">All</option>
+              <option value="true">Found</option>
+              <option value="false">Not Found</option>
+            </select>
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
+              ▼
+            </span>
+          </div>
         </div>
 
         <div className="mb-4 flex gap-2">
@@ -327,7 +351,7 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                     {item.description}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Lost at: {item.location}
+                    <strong>Lost at:</strong> {item.location}
                   </p>
                 </CardContent>
               </Card>
@@ -418,11 +442,15 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
       )}
       <Dialog open={Dialogactive} onOpenChange={setDialogactive}>
         <DialogContent className="max-w-lg w-[90%] max-h-[80vh] overflow-y-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
-          {item ? ( // ✅ Put condition here
+          {item ? (
             <>
               <DialogHeader>
-                <DialogTitle>{item.title}</DialogTitle>
-                <DialogDescription>{item.description}</DialogDescription>
+                <DialogTitle className="text-gray-900 dark:text-white">
+                  {item.title}
+                </DialogTitle>
+                <DialogDescription className="text-gray-700 dark:text-gray-300">
+                  {item.description}
+                </DialogDescription>
               </DialogHeader>
 
               <div className="flex flex-col gap-4 mt-4">
@@ -433,23 +461,21 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                 />
 
                 <div className="text-sm space-y-1">
-                  <p>
+                  <p className="text-gray-800 dark:text-gray-100">
                     <strong>Category:</strong> {item.category}
                   </p>
-                  <p>
+                  <p className="text-gray-800 dark:text-gray-100">
                     <strong>Date Lost:</strong>{" "}
                     {new Date(item.dateLost).toDateString()}
                   </p>
-                  <p>
+                  <p className="text-gray-800 dark:text-gray-100">
                     <strong>Location:</strong> {item.location}
                   </p>
+
                   <div>
                     <Button
-                      className="w-full p-1 mt-2 bg-green-500 hover:bg-green-400"
-                      onClick={() => 
-                        claimHandler(item._id)
-                       
-                      }
+                      className="w-full p-1 mt-2 bg-green-500 hover:bg-green-400 dark:bg-green-600 dark:hover:bg-green-500 text-white"
+                      onClick={() => claimHandler(item._id)}
                       disabled={item.isFound || foundloading}
                     >
                       {foundloading ? (
@@ -459,37 +485,53 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                       ) : item.isFound ? (
                         "Found"
                       ) : (
-                        "Mark as found!"
+                        "Mark as Found!"
                       )}
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 mt-3  pt-3">
-                  <img
-                    src={item.user?.avatar?.url}
-                    alt={item.user?.username}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium">
-                      Reported By: {item.user?.fullName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      @{item.user?.username}
-                    </p>
+                <div className="border-t pt-4">
+                  <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">
+                    <strong>Reporter's Info:</strong>
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={item.user?.avatar?.url || "/default-avatar.png"}
+                      alt={item.user?.username}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">
+                        {item.user?.fullName || "Unknown Seller"}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">
+                        📧 {item.user?.email || "No email provided"}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">
+                        📞 {item.user?.phone || "No phone available"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="secondary">Close</Button>
+                  <Button
+                    variant="secondary"
+                    className="bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Close
+                  </Button>
                 </DialogClose>
               </DialogFooter>
             </>
           ) : (
-            <p className="text-center py-4">Loading item details...</p> // 👈 Fallback while fetching
+            <p className="text-center py-4 text-gray-700 dark:text-gray-300">
+              Loading item details...
+            </p>
           )}
         </DialogContent>
       </Dialog>
