@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import useFetchAllLostItems from "@/hooks/usefetchallLostItems";
 import axios from "axios";
@@ -408,31 +409,39 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
                 <Card
-                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[380px] flex flex-col"
+                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[370px] flex flex-col relative"
                   onClick={() => cardClickHandler(item._id)}
                 >
-                  <CardContent className="p-4 sm:p-6 flex flex-col justify-between h-full">
-                    <div>
-                      <img
-                        src={item.image?.url || "/placeholder-lost.png"}
-                        alt={item.title}
-                        className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-300 hover:scale-105"
-                      />
+                  <Badge 
+                    className={`absolute bottom-3 right-3 z-10 ${
+                      item.isFound 
+                        ? "bg-green-500 hover:bg-green-600 text-white" 
+                        : "bg-red-500 hover:bg-red-600 text-white"
+                    }`}
+                  >
+                    {item.isFound ? "Found" : "Not Found"}
+                  </Badge>
+                  <CardContent className="p-4 sm:p-6 flex flex-col h-full">
+                    <img
+                      src={item.image?.url || "/placeholder-lost.png"}
+                      alt={item.title}
+                      className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-300 hover:scale-105"
+                    />
+                    <div className="flex flex-col flex-grow">
                       <h3 className="text-lg sm:text-xl font-semibold mb-1 transition-colors duration-300 hover:text-blue-600 truncate">
                         {item.title}
                       </h3>
                       <p
-                        className="text-gray-600 dark:text-gray-400 mb-2 text-sm line-clamp-2"
+                        className="text-gray-600 dark:text-gray-400 mb-2 text-sm line-clamp-2 flex-grow"
                         title={item.description}
                       >
                         {item.description}
                       </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        <strong>📍 Lost at:</strong>{" "}
+                        {item.location || "Not specified"}
+                      </p>
                     </div>
-
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      <strong>📍 Lost at:</strong>{" "}
-                      {item.location || "Not specified"}
-                    </p>
                   </CardContent>
                 </Card>
               </motion.div>

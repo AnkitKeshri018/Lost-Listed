@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useDispatch, useSelector } from "react-redux";
 import useFetchAllFoundItems from "@/hooks/usefetchallFoundItems.tsx";
 import axios from "axios";
@@ -375,9 +376,18 @@ const FoundItems = () => {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
                 <Card
-                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[370px] flex flex-col"
+                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[370px] flex flex-col relative"
                   onClick={() => cardClickHandler(item._id)}
                 >
+                  <Badge 
+                    className={`absolute bottom-3 right-3 z-10 ${
+                      item.isClaimed 
+                        ? "bg-green-500 hover:bg-green-600 text-white" 
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}
+                  >
+                    {item.isClaimed ? "Claimed" : "Not Claimed"}
+                  </Badge>
                   <CardContent className="p-4 sm:p-6 flex flex-col flex-grow">
                     <img
                       src={item.image?.url}

@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -23,7 +24,6 @@ import {
 import useFetchAllProducts from "@/hooks/MarketPlace/usefetchallProducts";
 import { useDispatch, useSelector } from "react-redux";
 import { setproducts } from "@/redux/productSlice";
-import { Badge } from "@/components/ui/badge";
 
 const Marketplace = () => {
   const { refetchProducts } = useFetchAllProducts();
@@ -376,9 +376,18 @@ const Marketplace = () => {
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
                 <Card
-                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[380px] flex flex-col"
+                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[380px] flex flex-col relative"
                   onClick={() => handleCardClick(item._id)}
                 >
+                  <Badge 
+                    className={`absolute bottom-3 right-3 z-10 ${
+                      item.isSold 
+                        ? "bg-red-500 hover:bg-red-600 text-white" 
+                        : "bg-green-500 hover:bg-green-600 text-white"
+                    }`}
+                  >
+                    {item.isSold ? "Sold" : "Available"}
+                  </Badge>
                   <CardContent className="p-4 sm:p-6 flex flex-col justify-between h-full">
                     <div>
                       <img
