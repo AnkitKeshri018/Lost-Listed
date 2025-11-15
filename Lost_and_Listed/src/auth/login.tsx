@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/authSlice";
 import designimage from "../../public/customimage.png";
@@ -14,16 +14,19 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
+
   const Spinner = () => (
     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
   );
 
-  const handleLogin = async (e:any) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -41,6 +44,8 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
   return (
     <div className="w-full h-screen flex flex-col md:flex-row bg-white dark:bg-black">
@@ -75,12 +80,16 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div>
+            {/* EMAIL WITH ICON */}
+            <div className="relative mb-4">
               <Label className="dark:text-gray-300 text-sm">Email</Label>
+              <span style={{ position: 'absolute', left: 12, top: '65%', transform: 'translateY(-50%)', color: '#aaa' }}>
+                <Mail size={18} />
+              </span>
               <Input
                 type="email"
                 placeholder="you@example.com"
-                className="dark:bg-gray-800 dark:border-gray-700 text-sm"
+                className="pl-10 dark:bg-gray-800 dark:border-gray-700 text-sm"
                 value={loginData.email}
                 onChange={(e) =>
                   setLoginData({ ...loginData, email: e.target.value })
@@ -89,18 +98,51 @@ const Login = () => {
               />
             </div>
 
-            <div>
+            {/* PASSWORD WITH ICON AND TOGGLE, ICONS EVEN LOWER */}
+            <div className="relative mb-4">
               <Label className="dark:text-gray-300 text-sm">Password</Label>
+              <span style={{ position: 'absolute', left: 12, top: '75%', transform: 'translateY(-50%)', color: '#aaa' }}>
+                <Lock size={18} />
+              </span>
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="dark:bg-gray-800 dark:border-gray-700 text-sm"
+                className="pl-10 pr-10 dark:bg-gray-800 dark:border-gray-700 text-sm"
                 value={loginData.password}
                 onChange={(e) =>
                   setLoginData({ ...loginData, password: e.target.value })
                 }
                 required
               />
+              {/* Eye toggle */}
+              <span
+                style={{ position: 'absolute', right: 12, top: '75%', transform: 'translateY(-50%)', color: '#aaa', cursor: 'pointer' }}
+                onClick={handleTogglePassword}
+                tabIndex={0}
+                role="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </span>
+            </div>
+
+            {/* REMEMBER ME & FORGOT PASSWORD */}
+            <div className="flex justify-between items-center mb-2">
+              <label className="flex items-center text-sm text-gray-600 dark:text-gray-400 cursor-pointer gap-1.5">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe((prev) => !prev)}
+                  className="mr-1 accent-indigo-600"
+                />
+                Remember Me
+              </label>
+              <Link
+                to="/forgotpassword"
+                className="text-indigo-600 text-xs hover:underline dark:text-indigo-400"
+              >
+                Forgot Password?
+              </Link>
             </div>
 
             <Button
@@ -141,12 +183,16 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div>
+            {/* EMAIL WITH ICON */}
+            <div className="relative mb-4">
               <Label className="dark:text-gray-300">Email</Label>
+              <span style={{ position: 'absolute', left: 12, top: '65%', transform: 'translateY(-50%)', color: '#aaa' }}>
+                <Mail size={18} />
+              </span>
               <Input
                 type="email"
                 placeholder="you@example.com"
-                className="dark:bg-gray-800 dark:border-gray-700"
+                className="pl-10 dark:bg-gray-800 dark:border-gray-700"
                 value={loginData.email}
                 onChange={(e) =>
                   setLoginData({ ...loginData, email: e.target.value })
@@ -155,18 +201,51 @@ const Login = () => {
               />
             </div>
 
-            <div>
+            {/* PASSWORD WITH ICON AND TOGGLE, ICONS EVEN LOWER */}
+            <div className="relative mb-4">
               <Label className="dark:text-gray-300">Password</Label>
+              <span style={{ position: 'absolute', left: 12, top: '75%', transform: 'translateY(-50%)', color: '#aaa' }}>
+                <Lock size={18} />
+              </span>
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="dark:bg-gray-800 dark:border-gray-700"
+                className="pl-10 pr-10 dark:bg-gray-800 dark:border-gray-700"
                 value={loginData.password}
                 onChange={(e) =>
                   setLoginData({ ...loginData, password: e.target.value })
                 }
                 required
               />
+              {/* Eye toggle */}
+              <span
+                style={{ position: 'absolute', right: 12, top: '75%', transform: 'translateY(-50%)', color: '#aaa', cursor: 'pointer' }}
+                onClick={handleTogglePassword}
+                tabIndex={0}
+                role="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </span>
+            </div>
+
+            {/* REMEMBER ME & FORGOT PASSWORD */}
+            <div className="flex justify-between items-center mb-2">
+              <label className="flex items-center text-sm text-gray-600 dark:text-gray-400 cursor-pointer gap-1.5">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe((prev) => !prev)}
+                  className="mr-1 accent-indigo-600"
+                />
+                Remember Me
+              </label>
+              <Link
+                to="/forgotpassword"
+                className="text-indigo-600 text-sm hover:underline dark:text-indigo-400"
+              >
+                Forgot Password?
+              </Link>
             </div>
 
             <Button

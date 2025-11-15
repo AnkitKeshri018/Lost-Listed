@@ -13,6 +13,7 @@ import Marketplace from "./pages/Marketplace";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./auth/ForgotPassword";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/forgotpassword" element={<ForgotPassword/>} />
           {/* Catch-all for undefined routes */}
 
           <Route path="*" element={<NotFound />} />
