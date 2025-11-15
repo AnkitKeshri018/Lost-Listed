@@ -320,7 +320,7 @@ export const markProductSold = async (req, res) => {
     }
 
     if (product.isSold) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "Product is already marked as sold",
       });
@@ -380,7 +380,7 @@ export const unmarkProductSold = async (req, res) => {
 
 
     if (!product.isSold) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "Product is already available",
       });

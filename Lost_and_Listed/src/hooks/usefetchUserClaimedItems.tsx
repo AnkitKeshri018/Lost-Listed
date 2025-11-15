@@ -10,6 +10,8 @@ const usefetchUserClaimedItems = () => {
 
   //  function that can be called anytime jb humko use ho khi refetch ka
   const fetchClaimedItems = useCallback(async () => {
+    dispatch(setuserClaimedItems([]));
+
     try {
       setLoading(true);
       const res = await axios.get("/api/v1/found-item/claimedByuser", {

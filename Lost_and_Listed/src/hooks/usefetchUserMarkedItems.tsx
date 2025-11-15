@@ -10,6 +10,7 @@ const usefetchUserMarkedItems = () => {
 
   //  function that can be called anytime jb humko use ho khi refetch ka
   const fetchMarkedItems = useCallback(async () => {
+    dispatch(setuserMarkedfoundItems([]));
     try {
       setLoading(true);
       const res = await axios.get("/api/v1/lost-item/foundByuser", {
@@ -17,6 +18,7 @@ const usefetchUserMarkedItems = () => {
       });
 
       if (res.data.success) {
+        
         dispatch(setuserMarkedfoundItems(res.data.data));
       } else {
         throw new Error(res.data.message || "Failed to fetch items");

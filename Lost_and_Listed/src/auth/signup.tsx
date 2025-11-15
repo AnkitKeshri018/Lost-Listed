@@ -4,16 +4,9 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
-import { USER_API_ENDPOINT } from "@/utils/constants";
+import { ArrowLeft } from "lucide-react";
+import designimage from "../../public/customimage.png";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -30,213 +23,219 @@ const Signup = () => {
     location: "",
   });
 
+  const Spinner = () => (
+    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+  );
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (signupData.password !== signupData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+    if (signupData.password !== signupData.confirmPassword)
+      return toast.error("Passwords do not match");
 
-    if (signupData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
+    if (signupData.password.length < 6)
+      return toast.error("Password must be at least 6 characters");
 
-    if (!avatar) {
-      toast.error("Please upload a profile picture");
-      return;
-    }
+    if (!avatar) return toast.error("Please upload a profile picture");
 
     setIsLoading(true);
-
     try {
       const formData = new FormData();
-      Object.entries(signupData).forEach(([key, value]) =>
-        formData.append(key, value)
+      Object.entries(signupData).forEach(([k, v]) =>
+        formData.append(k, v as string)
       );
       formData.append("avatar", avatar);
 
-      const res = await axios.post(
-        `/api/v1/user/register`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const res = await axios.post(`/api/v1/user/register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (res.data.success) {
-        toast.success("Account created successfully!");
+        toast.success("Account created!");
         navigate("/login");
-      } else {
-        toast.error(res.data.message || "Signup failed.");
       }
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Error connecting to server."
-      );
+      toast.error(error.response?.data?.message || "Signup failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-6">
-      <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-center gap-8 bg-card/30 backdrop-blur-lg rounded-3xl shadow-lg p-8">
-        {/* Left side */}
-        <div className="hidden md:flex flex-col items-center justify-center w-1/2 text-center px-6">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-card/90 mb-4 shadow-lg">
-            <Search className="h-10 w-10 text-primary" />
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Lost & Listed</h1>
-          <p className="text-white/80 max-w-sm text-sm">
-            Find what's lost, list what you don't need — join a community built
-            on finding and sharing.
+    <div className="w-full h-screen flex flex-col md:flex-row bg-white dark:bg-black">
+      {/* Desktop image */}
+      <div className="hidden md:block md:w-[45%] h-full">
+        <img
+          src={designimage}
+          alt="Signup Poster"
+          className="w-full h-full object-contain"
+        />
+      </div>
+
+      {/* Right section */}
+      <div className="flex-1 flex items-center justify-center px-4 md:px-14 py-4 md:py-0">
+        {/* Form wrapper */}
+        <div
+          className={`
+    w-full max-w-md md:max-w-lg 
+    rounded-2xl p-4 md:p-0 
+    bg-white/40 dark:bg-gray-900/80 md:bg-transparent md:dark:bg-black 
+    backdrop-blur-xl md:backdrop-blur-none 
+    shadow-lg md:shadow-none 
+    border dark:border-gray-700 md:border-0
+  `}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+            className="mb-2 text-gray-600 hover:text-indigo-600 dark:text-gray-300"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+
+          <h2 className="text-3xl flex justify-start md:text-3xl font-bold text-indigo-700 dark:text-white mb-1">
+            Sign Up
+          </h2>
+          <p className=" flex justify-start text-gray-600 dark:text-gray-400 mb-4 md:mb-6 text-sm md:text-base">
+            Join Lost & Listed today
           </p>
+
+          <form
+            onSubmit={handleSignup}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+          >
+            <div>
+              <Label className="dark:text-gray-300 text-sm">Full Name</Label>
+              <Input
+                placeholder="John Doe"
+                value={signupData.fullName}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, fullName: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="dark:text-gray-300 text-sm">Username</Label>
+              <Input
+                placeholder="john123"
+                value={signupData.username}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, username: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="dark:text-gray-300 text-sm">Email</Label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={signupData.email}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, email: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="dark:text-gray-300 text-sm">Phone</Label>
+              <Input
+                placeholder="+91 XXXXX XXXXX"
+                value={signupData.phone}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, phone: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label className="dark:text-gray-300 text-sm">Location</Label>
+              <Input
+                placeholder="Hostel / City"
+                value={signupData.location}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, location: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label className="dark:text-gray-300 text-sm">
+                Profile Picture
+              </Label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setAvatar(e.target.files?.[0] || null)}
+                className="text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="dark:text-gray-300 text-sm">Password</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={signupData.password}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, password: e.target.value })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="dark:text-gray-300 text-sm">
+                Confirm Password
+              </Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={signupData.confirmPassword}
+                onChange={(e) =>
+                  setSignupData({
+                    ...signupData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+                className="text-sm"
+              />
+            </div>
+
+            <div className="sm:col-span-2 mt-2">
+              <Button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    Creating...
+                  </div>
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
+
+              <p className="text-center text-gray-600 dark:text-gray-400 mt-2 text-xs md:text-sm">
+                Already have an account?{" "}
+                <span
+                  className="text-indigo-600 cursor-pointer dark:text-indigo-400"
+                  onClick={() => navigate("/login")}
+                >
+                  Login here
+                </span>
+              </p>
+            </div>
+          </form>
         </div>
-
-        {/* Right side form */}
-        <Card className="w-full md:w-1/2 bg-white/95 backdrop-blur-sm shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Sign Up</CardTitle>
-            <CardDescription>Join Lost & Listed today</CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSignup} className="grid grid-cols-2 gap-4">
-              {/* Full Name */}
-              <div className="col-span-1">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={signupData.fullName}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, fullName: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              {/* Username */}
-              <div className="col-span-1">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="johndoe"
-                  value={signupData.username}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, username: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              {/* Email */}
-              <div className="col-span-1">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@college.edu"
-                  value={signupData.email}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, email: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="col-span-1">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  type="text"
-                  placeholder="9876543210"
-                  value={signupData.phone}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, phone: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Location */}
-              <div className="col-span-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  type="text"
-                  placeholder="Hostel / City"
-                  value={signupData.location}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, location: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Avatar Upload */}
-              <div className="col-span-2">
-                <Label htmlFor="avatar">Profile Picture</Label>
-                <Input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAvatar(e.target.files?.[0] || null)}
-                  required
-                />
-              </div>
-
-              {/* Password + Confirm */}
-              <div className="col-span-1">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={signupData.password}
-                  onChange={(e) =>
-                    setSignupData({ ...signupData, password: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="col-span-1">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={signupData.confirmPassword}
-                  onChange={(e) =>
-                    setSignupData({
-                      ...signupData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="col-span-2 mt-3">
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
-                </Button>
-
-                <p className="text-center text-black/70 text-sm mt-6">
-                  Already have an account?{" "}
-                  <span
-                    onClick={() => navigate("/login")}
-                    className="underline cursor-pointer text-purple hover:text-blue-300"
-                  >
-                    Login
-                  </span>
-                </p>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

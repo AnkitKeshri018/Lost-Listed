@@ -1,8 +1,15 @@
 import type { Config } from "tailwindcss";
+import tailwindAnimate from "tailwindcss-animate";
+
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -51,15 +58,15 @@ export default {
         },
       },
       backgroundImage: {
-        'gradient-hero': 'var(--gradient-hero)',
-        'gradient-accent': 'var(--gradient-accent)',
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-accent": "var(--gradient-accent)",
       },
       boxShadow: {
-        card: 'var(--shadow-card)',
-        hover: 'var(--shadow-hover)',
+        card: "var(--shadow-card)",
+        hover: "var(--shadow-hover)",
       },
       transitionTimingFunction: {
-        smooth: 'var(--transition-smooth)',
+        smooth: "var(--transition-smooth)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -88,7 +95,35 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      extend: {
+        keyframes: {
+          "fade-in-up": {
+            "0%": { opacity: 0, transform: "translateY(10px)" },
+            "100%": { opacity: 1, transform: "translateY(0)" },
+          },
+        },
+        animation: {
+          "fade-in-up": "fade-in-up 0.5s ease-out forwards",
+        },
+      },
+      theme: {
+        extend: {
+          keyframes: {
+            "fade-in": {
+              "0%": { opacity: 0 },
+              "100%": { opacity: 1 },
+            },
+            "fade-in-up": {
+              "0%": { opacity: 0, transform: "translateY(16px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          },
+          animation: {
+            "fade-in": "fade-in 0.7s ease",
+            "fade-in-up": "fade-in-up 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+          },
+        },
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
 } satisfies Config;

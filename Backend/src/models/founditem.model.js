@@ -22,7 +22,6 @@ const foundItemSchema = new Schema(
         "Documents",
         "Clothing",
         "Accessories",
-        "Pets",
         "Other",
       ],
       default: "Other",

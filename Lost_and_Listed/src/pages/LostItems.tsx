@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import useFetchAllLostItems from "@/hooks/usefetchallLostItems";
 import axios from "axios";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,8 @@ import useFetchAllFoundItems from "@/hooks/usefetchallFoundItems.tsx";
 
 
 const LostItems = () => {
+  const [showFilters, setShowFilters] = useState(false);
+
   
     const { refetchItems } = useFetchAllLostItems();
 
@@ -200,115 +203,159 @@ const LostItems = () => {
 const lostItems = useSelector((store: any) => store.lostitem.lostItems);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-red-50 dark:bg-gray-900">
       <Navbar />
-
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div
+          className={`mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 
+              transition-all duration-700 ease-out transform 
+              opacity-0 translate-y-4`}
+          // Animate on mount
+          ref={(el) => {
+            if (el)
+              setTimeout(
+                () => el.classList.remove("opacity-0", "translate-y-4"),
+                50
+              );
+          }}
+        >
           <div>
-            <h1 className="text-4xl font-bold mb-2 text-red-600">Lost Items</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-red-600">
+              Lost Items
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
               Report your lost items and help others find them.
             </p>
           </div>
+
           <Button
             onClick={() => setShowAddModal(true)}
-            className="gap-2 bg-red-500 hover:bg-red-600 text-white"
+            className="gap-2 bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto transition-colors duration-300"
           >
             <Plus className="h-4 w-4" />
             Report Lost Item
           </Button>
         </div>
-
-        {/*Filter Card ha */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-          {/* Title Input */}
-          <input
-            name="title"
-            placeholder="Search Title"
-            onChange={handleFilterChange}
-            value={filters.title}
-            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-          />
-
-          {/* Location Input */}
-          <input
-            name="location"
-            placeholder="Location"
-            onChange={handleFilterChange}
-            value={filters.location}
-            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
-          />
-
-          {/* Category Select */}
-          <div className="relative">
-            <select
-              name="category"
-              onChange={handleFilterChange}
-              value={filters.category}
-              className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8"
+        {/* Filters Section */}
+        <div className="mb-6">
+          {/* Toggle Button — Now visible on all screens */}
+          <div className="mb-4 flex justify-between items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-500 border-red-400 hover:bg-red-500 dark:bg-gray-800"
+              onClick={() => setShowFilters((prev) => !prev)}
             >
-              <option value="">All Categories</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Documents">Documents</option>
-              <option value="Clothing">Clothing</option>
-              <option value="Accessories">Accessories</option>
-              <option value="Other">Other</option>
-            </select>
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
-              ▼
-            </span>
+              {showFilters ? "Hide Filters" : "Show Filters"}
+            </Button>
           </div>
 
-          {/* Date From */}
-          <input
-            type="date"
-            name="dateFrom"
-            onChange={handleFilterChange}
-            value={filters.dateFrom}
-            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white"
-          />
-
-          {/* Date To */}
-          <input
-            type="date"
-            name="dateTo"
-            onChange={handleFilterChange}
-            value={filters.dateTo}
-            className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white"
-          />
-
-          {/* Is Found Select */}
-          <div className="relative">
-            <select
-              name="isFound"
+          {/* Filters Grid (collapsible on all screens) */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{
+              opacity: showFilters ? 1 : 0,
+              height: showFilters ? "auto" : 0,
+            }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 overflow-hidden"
+          >
+            {/* Title Input */}
+            <input
+              name="title"
+              placeholder="Search Title"
               onChange={handleFilterChange}
-              value={filters.isFound}
-              className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8"
-            >
-              <option value="">All</option>
-              <option value="true">Found</option>
-              <option value="false">Not Found</option>
-            </select>
-            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
-              ▼
-            </span>
-          </div>
+              value={filters.title}
+              className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300 transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+
+            {/* Location Input */}
+            <input
+              name="location"
+              placeholder="Location"
+              onChange={handleFilterChange}
+              value={filters.location}
+              className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300 transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+
+            {/* Category Select */}
+            <div className="relative">
+              <select
+                name="category"
+                onChange={handleFilterChange}
+                value={filters.category}
+                className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8 transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              >
+                <option value="">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Documents">Documents</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Other">Other</option>
+              </select>
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
+                ▼
+              </span>
+            </div>
+
+            {/* Date From */}
+            <input
+              type="date"
+              name="dateFrom"
+              onChange={handleFilterChange}
+              value={filters.dateFrom}
+              className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+
+            {/* Date To */}
+            <input
+              type="date"
+              name="dateTo"
+              onChange={handleFilterChange}
+              value={filters.dateTo}
+              className="border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+
+            {/* Is Found Select */}
+            <div className="relative">
+              <select
+                name="isFound"
+                onChange={handleFilterChange}
+                value={filters.isFound}
+                className="w-full border p-2 rounded text-sm bg-white dark:bg-gray-800 text-black dark:text-white appearance-none pr-8 transition-all duration-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              >
+                <option value="">All</option>
+                <option value="true">Found</option>
+                <option value="false">Not Found</option>
+              </select>
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
+                ▼
+              </span>
+            </div>
+          </motion.div>
         </div>
-
-        <div className="mb-4 flex gap-2">
+        {/* Filter Buttons — hidden when filters collapsed */}
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{
+            opacity: showFilters ? 1 : 0,
+            height: showFilters ? "auto" : 0,
+          }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="mb-4 flex flex-wrap gap-2 overflow-hidden"
+        >
           <Button
             onClick={applyFilters}
-            className="bg-red-500  hover:bg-red-400 text-white"
+            className="bg-red-500 hover:bg-red-400 text-white w-full sm:w-auto transition-colors duration-300"
           >
             Apply Filters
           </Button>
+
           <Button
             variant="secondary"
-            className="bg-red-500 text-white hover:bg-red-400"
+            className="bg-red-500 text-white hover:bg-red-400 w-full sm:w-auto transition-colors duration-300"
             onClick={async () => {
-              // reset inputs
               setFilters({
                 title: "",
                 category: "",
@@ -317,44 +364,57 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                 dateTo: "",
                 isFound: "",
               });
-
-              // ✅ reset results in UI
-              const res = await filterItems(""); // empty params = get all
-              if (res.data.success) {
-                dispatch(setLostItems(res.data.data));
-              }
+              const res = await filterItems("");
+              if (res.data.success) dispatch(setLostItems(res.data.data));
             }}
           >
             Reset Filters
           </Button>
-        </div>
+        </motion.div>
 
-        {/* Items Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {/* Lost Items Grid */}
+        <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {lostItems?.length === 0 ? (
-            <p>No lost items yet.</p>
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No lost items yet.
+            </p>
           ) : (
-            lostItems?.map((item: any) => (
-              <Card
+            lostItems?.map((item: any, index: number) => (
+              <motion.div
                 key={item._id}
-                className="hover:shadow-lg transition-all"
-                onClick={() => cardClickHandler(item._id)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <CardContent className="p-6">
-                  <img
-                    src={item.image?.url}
-                    alt={item.title}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                  />
-                  <h3 className="text-xl font-semibold mb-1">{item.title}</h3>
-                  <p className="text-muted-foreground mb-2">
-                    {item.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Lost at:</strong> {item.location}
-                  </p>
-                </CardContent>
-              </Card>
+                <Card
+                  className="cursor-pointer transform transition-transform duration-300 hover:scale-105 hover:shadow-lg h-[380px] flex flex-col"
+                  onClick={() => cardClickHandler(item._id)}
+                >
+                  <CardContent className="p-4 sm:p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <img
+                        src={item.image?.url || "/placeholder-lost.png"}
+                        alt={item.title}
+                        className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-300 hover:scale-105"
+                      />
+                      <h3 className="text-lg sm:text-xl font-semibold mb-1 transition-colors duration-300 hover:text-blue-600 truncate">
+                        {item.title}
+                      </h3>
+                      <p
+                        className="text-gray-600 dark:text-gray-400 mb-2 text-sm line-clamp-2"
+                        title={item.description}
+                      >
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      <strong>📍 Lost at:</strong>{" "}
+                      {item.location || "Not specified"}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))
           )}
         </div>
@@ -362,10 +422,10 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
 
       {/* Simple Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md space-y-4"
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-xl shadow-xl w-full max-w-md space-y-4"
           >
             <h2 className="text-2xl font-semibold mb-4">Report Lost Item</h2>
 
@@ -376,7 +436,7 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
               value={form.title}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
 
             <textarea
@@ -384,14 +444,14 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
               placeholder="Description"
               value={form.description}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
 
             <select
               name="category"
               value={form.category}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option>Electronics</option>
               <option>Documents</option>
@@ -406,7 +466,7 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
               value={form.dateLost}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
 
             <input
@@ -416,10 +476,15 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
               value={form.location}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
 
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <input
+              type="file"
+              accept="image/*"
+              className="text-gray-900 dark:text-gray-100"
+              onChange={handleFileChange}
+            />
 
             <div className="flex justify-end gap-3">
               <Button
@@ -434,12 +499,13 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                 className="bg-red-600 hover:bg-red-500 text-white"
               >
                 {loadingReport && <Spinner />}
-                {loadingReport ? "Reporting Your item..." : "Report Lost Item"}
+                {loadingReport ? "Reporting Your Item..." : "Report Lost Item"}
               </Button>
             </div>
           </form>
         </div>
       )}
+
       <Dialog open={Dialogactive} onOpenChange={setDialogactive}>
         <DialogContent className="max-w-lg w-[90%] max-h-[80vh] overflow-y-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
           {item ? (
