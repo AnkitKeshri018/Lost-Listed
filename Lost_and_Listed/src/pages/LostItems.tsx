@@ -26,6 +26,7 @@ import useFetchAllFoundItems from "@/hooks/usefetchallFoundItems.tsx";
 
 const LostItems = () => {
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   
     const { refetchItems } = useFetchAllLostItems();
@@ -76,6 +77,7 @@ const LostItems = () => {
   
 
   const applyFilters = async () => {
+    setIsLoading(true);
     try {
       const params = new URLSearchParams();
 
@@ -92,6 +94,8 @@ const LostItems = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -373,13 +377,30 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
         </motion.div>
 
         {/* Lost Items Grid */}
-        <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {lostItems?.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No lost items yet.
-            </p>
-          ) : (
-            lostItems?.map((item: any, index: number) => (
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i} className="h-[380px] animate-pulse">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 rounded-lg mb-4"></div>
+                  <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : lostItems?.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="inline-block p-8 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+              <span className="text-6xl">🔍</span>
+            </div>
+            <h3 className="text-2xl font-semibold mb-2 text-gray-700 dark:text-gray-300">No Lost Items Yet</h3>
+            <p className="text-gray-500 dark:text-gray-400">Be the first to report a lost item!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {lostItems?.map((item: any, index: number) => (
               <motion.div
                 key={item._id}
                 initial={{ opacity: 0, y: 20 }}
@@ -415,9 +436,9 @@ const lostItems = useSelector((store: any) => store.lostitem.lostItems);
                   </CardContent>
                 </Card>
               </motion.div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Simple Modal */}

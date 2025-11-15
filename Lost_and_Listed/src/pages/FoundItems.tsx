@@ -359,9 +359,13 @@ const FoundItems = () => {
         {/* Found Items Grid */}
         <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {foundItems?.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No found items yet.
-            </p>
+            <div className="col-span-full text-center py-16">
+              <div className="inline-block p-8 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                <MapPin className="h-16 w-16 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-2 text-gray-700 dark:text-gray-300">No Found Items Yet</h3>
+              <p className="text-gray-500 dark:text-gray-400">Be the first to report a found item!</p>
+            </div>
           ) : (
             foundItems?.map((item: any, index: number) => (
               <motion.div

@@ -1,1 +1,1 @@
-export const DB_NAME = "LostAndFound";
+export const DB_NAME="LostAndFound";
