@@ -157,7 +157,7 @@ const FoundItems = () => {
     toast.success(
       savedItems.includes(itemId) 
         ? "Removed from saved items" 
-        : "Saved to your collection"
+        : "Added to saved items"
     );
   };
 
